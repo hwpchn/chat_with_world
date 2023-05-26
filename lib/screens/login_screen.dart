@@ -9,8 +9,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _email = TextEditingController();
-  final TextEditingController _password = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   bool _rememberMe = false;
 
@@ -31,45 +31,29 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _login() async {
-    await AppwriteService.instance
-        .createSession(_email.text, _password.text)
-        .then((response) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Login Successful"),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+    if (_formKey.currentState!.validate()) {
+      AppwriteService.instance
+          .loginUser(
+        _emailController.text,
+        _passwordController.text,
+      )
+          .then((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login successful'),
+            backgroundColor: Colors.green,
           ),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    }).catchError((error) {
-      String errorMessage = "";
-      if (error.code == 400) {
-        errorMessage = '密码和用户名不能为空';
-      } else if (error.code == 401) {
-        errorMessage = '密码错误';
-      } else {
-        errorMessage = '超过次数';
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "\ufeff$errorMessage",
-            overflow: TextOverflow.ellipsis,
+        );
+        Navigator.pop(context); // Go back to the main screen
+      }).catchError((error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Login failed'),
+            backgroundColor: Colors.red,
           ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          duration: Duration(seconds: 2),
-        ),
-      );
-    });
+        );
+      });
+    }
   }
 
   Widget _buildEmailTF() {
@@ -100,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           height: 60.0,
           child: TextFormField(
-            controller: _email,
+            controller: _emailController,
             keyboardType: TextInputType.emailAddress,
             style: TextStyle(
               color: Colors.white,
@@ -154,7 +138,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
           height: 60.0,
           child: TextFormField(
-            controller: _password,
+            controller: _passwordController,
             obscureText: true,
             style: TextStyle(
               color: Colors.white,

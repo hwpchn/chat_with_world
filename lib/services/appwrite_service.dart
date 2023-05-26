@@ -14,14 +14,22 @@ class AppwriteService {
         .setProject('646de30fc78fac0c6388'); // Your project ID
   }
 
-  Future<void> createSession(String email, String password) async {
+  Future<void> registerUser(
+      String userId, String email, String password, String name) async {
     final account = Account(_client);
-    final response = await account.createEmailSession(
-      email: email,
-      password: password,
-    );
+    final response = await account.create(
+        userId: userId, email: email, password: password, name: name);
+    if (response.$id == false) {
+      throw Exception('Failed to create user');
+    }
+  }
+
+  Future<void> loginUser(String email, String password) async {
+    final account = Account(_client);
+    final response =
+        await account.createEmailSession(email: email, password: password);
     if (response.current != true) {
-      throw Exception('Failed to create session');
+      throw Exception('Failed to login user');
     }
   }
 }

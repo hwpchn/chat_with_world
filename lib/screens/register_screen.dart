@@ -9,8 +9,10 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _userIdController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) {
@@ -30,11 +32,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      try {
-        await AppwriteService.instance.registerUser(
-          _emailController.text,
-          _passwordController.text,
-        );
+      AppwriteService.instance.registerUser(
+        _userIdController.text,
+        _emailController.text,
+        _passwordController.text,
+        _nameController.text,
+      ).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Registration successful'),
@@ -42,14 +45,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         );
         Navigator.pop(context); // Go back to the login screen
-      } catch (error) {
+      }).catchError((error) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration failed: $error'),
+            content: Text('Registration failed'),
             backgroundColor: Colors.red,
           ),
         );
-      }
+      });
     }
   }
 
