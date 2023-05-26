@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chat_with_world/services/appwrite_service.dart';
+import 'package:chat_with_world/screens/register_screen.dart';
+import 'package:chat_with_world/screens/chat_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -44,14 +46,53 @@ class _LoginScreenState extends State<LoginScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        Navigator.pop(context); // Go back to the main screen
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Login failed'),
-            backgroundColor: Colors.red,
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                ChatScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: animation,
+                  child: child,
+                ),
+              );
+            },
           ),
         );
+      }).catchError((error) {
+        String errorMessage;
+        print(error);
+        if (error.code == 400) {
+          errorMessage =
+              'Bad Request: The API server could not understand the request.';
+        } else if (error.code == 401) {
+          errorMessage =
+              'Unauthorized: No or invalid authentication details were provided.';
+        } else if (error.code == 403) {
+          errorMessage =
+              'Forbidden: You do not have permissions to access the resource.';
+        } else if (error.code == 404) {
+          errorMessage =
+              'Not Found: The requested resource could not be found.';
+        } else if (error.code == 409) {
+          errorMessage =
+              'Conflict: The request could not be completed due to a conflict.';
+        } else if (error.code == 500) {
+          errorMessage =
+              'Internal Server Error: An error occurred on the server.';
+        } else {
+          errorMessage = 'An unknown error occurred.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.red,
+          ),
+        );// ... existing error handling code ...
       });
     }
   }
@@ -313,7 +354,25 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildSignupBtn() {
     return GestureDetector(
-      onTap: () => print('Sign Up Button Pressed'),
+      onTap: () {
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                RegisterScreen(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: animation,
+                  child: child,
+                ),
+              );
+            },
+          ),
+        );
+      },
       child: RichText(
         text: TextSpan(
           children: [

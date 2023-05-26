@@ -32,12 +32,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
-      AppwriteService.instance.registerUser(
+      AppwriteService.instance
+          .registerUser(
         _userIdController.text,
         _emailController.text,
         _passwordController.text,
         _nameController.text,
-      ).then((_) {
+      )
+          .then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Registration successful'),
@@ -46,9 +48,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         Navigator.pop(context); // Go back to the login screen
       }).catchError((error) {
+        print(error);
+        String errorMessage = "";
+        if (error.code == 400) {
+          errorMessage =
+              'Bad Request: The API server could not understand the request.';
+        } else if (error.code == 401) {
+          errorMessage =
+              'Unauthorized: No or invalid authentication details were provided.';
+        } else if (error.code == 403) {
+          errorMessage =
+              'Forbidden: You do not have permissions to access the resource.';
+        } else if (error.code == 404) {
+          errorMessage =
+              'Not Found: The requested resource could not be found.';
+        } else if (error.code == 409) {
+          errorMessage =
+              'Conflict: The request could not be completed due to a conflict.';
+        } else if (error.code == 500) {
+          errorMessage =
+              'Internal Server Error: An error occurred on the server.';
+        } else {
+          errorMessage = 'An unknown error occurred.';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration failed'),
+            content: Text(errorMessage),
             backgroundColor: Colors.red,
           ),
         );
